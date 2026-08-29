@@ -237,6 +237,8 @@ List of command line options for configuring the Builder.
   - env: _BUILDER_MAX_BUNDLE_SIZE_
 - `--builder.max_blocks_to_wait_for_mine`: After submitting a bundle transaction, the maximum number of blocks to wait for that transaction to mine before trying to resend with higher gas fees (default: `2`)
   - env: _BUILDER_MAX_BLOCKS_TO_WAIT_FOR_MINE_
+- `--builder.max_bundle_fee`: Fee budget for a single bundle transaction, in wei. Unset, the budget is the builder signer's native balance. Set this on chains that charge gas in a token rather than the native asset, where the BALANCE opcode reads zero for every account and every bundle would otherwise be dropped with "Max bundle fee is zero, skipping bundle" (default: unset)
+  - env: _BUILDER_MAX_BUNDLE_FEE_
 - `--builder.replacement_fee_percent_increase`: Percentage amount to increase gas fees when retrying a transaction after it failed to mine (default: `10`)
   - env: _BUILDER_REPLACEMENT_FEE_PERCENT_INCREASE_
 - `--builder.max_cancellation_fee_increases`: Maximum number of cancellation fee increases to attempt (default: `15`)

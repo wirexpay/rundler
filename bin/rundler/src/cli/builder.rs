@@ -181,6 +181,21 @@ pub struct BuilderArgs {
     )]
     max_blocks_to_wait_for_mine: u64,
 
+    /// Fee budget for a single bundle transaction, in wei. Unset, the budget is
+    /// the builder signer's native balance.
+    ///
+    /// Set this on chains that charge gas in a token rather than the native asset.
+    /// There the BALANCE opcode reads zero for every account — including bundlers
+    /// that submit successfully — so the derived budget is zero and every bundle is
+    /// dropped with "Max bundle fee is zero, skipping bundle". The value then caps
+    /// what one bundle may cost, and the signer's token balance is the real limit.
+    #[arg(
+        long = "builder.max_bundle_fee",
+        name = "builder.max_bundle_fee",
+        env = "BUILDER_MAX_BUNDLE_FEE"
+    )]
+    max_bundle_fee: Option<u128>,
+
     /// Percentage amount to increase gas fees when retrying a transaction after
     /// it failed to mine.
     #[arg(
@@ -332,6 +347,7 @@ impl BuilderArgs {
             sender_args,
             sim_settings: common.try_into()?,
             max_blocks_to_wait_for_mine: self.max_blocks_to_wait_for_mine,
+            max_bundle_fee: self.max_bundle_fee,
             replacement_fee_percent_increase: self.replacement_fee_percent_increase,
             max_cancellation_fee_increases: self.max_cancellation_fee_increases,
             max_replacement_underpriced_blocks: self.max_replacement_underpriced_blocks,

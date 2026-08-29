@@ -18,7 +18,7 @@ use std::{
     time::Duration,
 };
 
-use alloy_primitives::{Address, B256};
+use alloy_primitives::{Address, B256, U256};
 use anyhow::Context;
 use futures_util::StreamExt;
 use rundler_provider::{
@@ -90,6 +90,9 @@ pub struct Args {
     pub rate_limit_backoff_initial: Duration,
     /// Maximum delay a builder waits between rate-limited submissions
     pub rate_limit_backoff_max: Duration,
+    /// Fee budget for a single bundle transaction, in wei. `None` uses the builder
+    /// signer's native balance, which is the default behaviour.
+    pub max_bundle_fee: Option<u128>,
     /// Address to bind the remote builder server to, if any. If none, no server is starter.
     pub remote_address: Option<SocketAddr>,
     /// Entry points to start builders for
@@ -557,6 +560,7 @@ where
             max_blocks_to_wait_for_mine: self.args.max_blocks_to_wait_for_mine,
             rate_limit_backoff_initial: self.args.rate_limit_backoff_initial,
             rate_limit_backoff_max: self.args.rate_limit_backoff_max,
+            max_bundle_fee: self.args.max_bundle_fee.map(U256::from),
         };
 
         let fee_estimator: Box<dyn FeeEstimator> = Box::new(self.providers.fee_estimator().clone());

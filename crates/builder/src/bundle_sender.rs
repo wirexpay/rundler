@@ -13,7 +13,7 @@
 
 use std::{collections::HashMap, sync::Arc, time::Duration};
 
-use alloy_primitives::{Address, B256, hex};
+use alloy_primitives::{Address, B256, U256, hex};
 use anyhow::{Context, bail};
 use async_trait::async_trait;
 #[cfg(test)]
@@ -64,6 +64,9 @@ pub(crate) struct Settings {
     pub(crate) max_blocks_to_wait_for_mine: u64,
     pub(crate) rate_limit_backoff_initial: Duration,
     pub(crate) rate_limit_backoff_max: Duration,
+    /// Overrides the signer's native balance as the per-bundle fee budget.
+    /// `None` keeps the balance-derived default.
+    pub(crate) max_bundle_fee: Option<U256>,
 }
 
 pub(crate) struct BundleSenderImpl<T, C> {
@@ -923,7 +926,7 @@ where
                             sender_eoa: self.sender_eoa,
                             nonce,
                             block_hash: state.block_hash(),
-                            max_bundle_fee: balance,
+                            max_bundle_fee: self.settings.max_bundle_fee.unwrap_or(balance),
                             bundle_fees,
                             base_fee,
                             required_op_fees,
@@ -3526,6 +3529,7 @@ mod tests {
                 max_replacement_underpriced_blocks: 3,
                 rate_limit_backoff_initial: Duration::from_secs(1),
                 rate_limit_backoff_max: Duration::from_secs(30),
+                max_bundle_fee: None,
             },
             broadcast::channel(1000).0,
             Arc::new(ProviderEventSignal::default()),
@@ -3562,6 +3566,7 @@ mod tests {
                 max_replacement_underpriced_blocks: 3,
                 rate_limit_backoff_initial: Duration::from_secs(1),
                 rate_limit_backoff_max: Duration::from_secs(30),
+                max_bundle_fee: None,
             },
             broadcast::channel(1000).0,
             Arc::new(ProviderEventSignal::default()),
